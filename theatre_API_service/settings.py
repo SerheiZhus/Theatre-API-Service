@@ -101,7 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
+AUTH_USER_MODEL = "user.User"
 
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
@@ -124,3 +124,4 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
