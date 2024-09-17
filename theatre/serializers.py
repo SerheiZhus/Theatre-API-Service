@@ -1,8 +1,10 @@
-
 from rest_framework import serializers
 from theatre.models import (
-    Genre, Actor, Play,
+    Genre,
+    Actor,
+    Play,
     TheatreHall,
+    Performance,
 )
 
 
@@ -27,7 +29,6 @@ class TheatreHallSerializer(serializers.ModelSerializer):
         fields = ("id", "name", "rows", "seats_in_row", "capacity")
 
 
-
 class PlaySerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -39,9 +40,7 @@ class PlayListSerializer(PlaySerializer):
     actors = serializers.SlugRelatedField(
         many=True, read_only=True, slug_field="full_name"
     )
-    genres = serializers.SlugRelatedField(
-        many=True, read_only=True, slug_field="name"
-    )
+    genres = serializers.SlugRelatedField(many=True, read_only=True, slug_field="name")
 
 
 class PlayRetrieveSerializer(PlaySerializer):
@@ -49,3 +48,28 @@ class PlayRetrieveSerializer(PlaySerializer):
     genres = GenreSerializer(many=True)
 
 
+class PerformanceSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Performance
+        fields = ("id", "play", "theatre_hall", "show_time")
+
+
+class PerformanceListSerializer(PerformanceSerializer):
+    play_title = serializers.CharField(source="play.title", read_only=True)
+    theatre_hall_name = serializers.CharField(
+        source="theatre_hall.name", read_only=True
+    )
+
+    class Meta:
+        model = Performance
+        fields = ("id", "play_title", "theatre_hall_name", "show_time")
+
+
+class PerformanceRetrieveSerializer(PerformanceSerializer):
+    play = PlayListSerializer()
+    theatre_hall = TheatreHallSerializer()
+
+    class Meta:
+        model = Performance
+        fields = ("id", "play", "theatre_hall", "show_time")
