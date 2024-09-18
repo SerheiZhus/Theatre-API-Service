@@ -1,3 +1,4 @@
+from django.template.defaultfilters import title
 from rest_framework import mixins, viewsets
 from rest_framework.viewsets import GenericViewSet
 from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Reservation
@@ -49,6 +50,11 @@ class PlayViewSet(
 ):
     queryset = Play.objects.prefetch_related("actors", "genres")
 
+    @staticmethod
+    def _params_to_ints(qs):
+
+        return [int(str_id) for str_id in qs.split(",")]
+
     def get_serializer_class(self):
         if self.action == "list":
             return PlayListSerializer
@@ -57,10 +63,26 @@ class PlayViewSet(
         return PlaySerializer
 
     def get_queryset(self):
+
+        title = self.request.query_params.get("title")
+        actors = self.request.query_params.get("actors")
+        genres = self.request.query_params.get("genres")
+
         queryset = self.queryset
+
+        if title:
+            queryset = queryset.filter(title__icontains=title)
+        if actors:
+            actor_ids = self._params_to_ints(actors)
+            queryset = queryset.filter(actors__id__in=actor_ids)
+        if genres:
+            genre_ids = self._params_to_ints(genres)
+            queryset = queryset.filter(genres__id__in=genre_ids)
+
         if self.action in ("list", "retrieve"):
             return queryset.prefetch_related("actors", "genres")
-        return queryset
+
+        return queryset.distinct()
 
 
 class PerformanceViewSet(viewsets.ModelViewSet):
