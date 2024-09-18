@@ -49,6 +49,7 @@ class PlayRetrieveSerializer(PlaySerializer):
     genres = GenreSerializer(many=True)
 
 
+
 class PerformanceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -67,14 +68,6 @@ class PerformanceListSerializer(PerformanceSerializer):
         fields = ("id", "play_title", "theatre_hall_name", "show_time")
 
 
-class PerformanceRetrieveSerializer(PerformanceSerializer):
-    play = PlayListSerializer()
-    theatre_hall = TheatreHallSerializer()
-
-    class Meta:
-        model = Performance
-        fields = ("id", "play", "theatre_hall", "show_time")
-
 
 class TicketSerializer(serializers.ModelSerializer):
 
@@ -92,6 +85,31 @@ class TicketSerializer(serializers.ModelSerializer):
         )
         return data
 
+class TicketListSerializer(TicketSerializer):
+    performance = serializers.CharField(source="performance.play", read_only=True)
+
+
+class TicketRetrieveSerializer(TicketSerializer):
+    performance = PerformanceListSerializer(many=False, read_only=True)
+
+
+class TicketSeatsSerializer(TicketSerializer):
+    class Meta:
+        model = Ticket
+        fields = ("row", "seat")
+
+class PerformanceRetrieveSerializer(PerformanceSerializer):
+    play = PlayListSerializer()
+    theatre_hall = serializers.CharField(
+        source="theatre_hall.name", read_only=True
+    )
+    tickets = TicketSeatsSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Performance
+        fields = ("id", "play", "show_time","theatre_hall", "tickets",  )
+
+
 
 
 class ReservationSerializer(serializers.ModelSerializer):
@@ -108,3 +126,11 @@ class ReservationSerializer(serializers.ModelSerializer):
             for ticket_data in tickets_data:
                 Ticket.objects.create(reservation=reservation, **ticket_data)
             return reservation
+
+
+class ReservationListSerializer(ReservationSerializer):
+    tickets = TicketListSerializer(many=True, read_only=True)
+
+
+class ReservationRetrieveSerializer(ReservationSerializer):
+    tickets = TicketRetrieveSerializer(many=True, read_only=True)

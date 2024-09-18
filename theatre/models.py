@@ -127,4 +127,5 @@ class Ticket(models.Model):
 
     class Meta:
         unique_together = ("row", "seat", "performance")
+        ordering = ("row", "seat")
 
