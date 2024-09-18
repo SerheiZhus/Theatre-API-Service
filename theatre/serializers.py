@@ -62,10 +62,12 @@ class PerformanceListSerializer(PerformanceSerializer):
     theatre_hall_name = serializers.CharField(
         source="theatre_hall.name", read_only=True
     )
+    total_seats = serializers.IntegerField(source="theatre_hall.capacity", read_only=True)
+    ticket_available = serializers.IntegerField(read_only=True)
 
     class Meta:
         model = Performance
-        fields = ("id", "play_title", "theatre_hall_name", "show_time")
+        fields = ("id", "play_title", "theatre_hall_name", "show_time", "total_seats", "ticket_available")
 
 
 
@@ -103,11 +105,11 @@ class PerformanceRetrieveSerializer(PerformanceSerializer):
     theatre_hall = serializers.CharField(
         source="theatre_hall.name", read_only=True
     )
-    tickets = TicketSeatsSerializer(many=True, read_only=True)
+    ticket_taken = TicketSeatsSerializer(many=True, read_only=True, source="tickets")
 
     class Meta:
         model = Performance
-        fields = ("id", "play", "show_time","theatre_hall", "tickets",  )
+        fields = ("id", "play", "show_time","theatre_hall", "ticket_taken",)
 
 
 

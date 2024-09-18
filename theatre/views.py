@@ -1,3 +1,4 @@
+from django.db.models import Count, F
 from django.template.defaultfilters import title
 from rest_framework import mixins, viewsets
 from rest_framework.viewsets import GenericViewSet
@@ -97,9 +98,15 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         queryset = self.queryset
-        if self.action in ("list", "retrieve"):
-            return queryset.select_related("play", "theatre_hall")
-        return queryset
+        if self.action in "list":
+            queryset = (
+                queryset
+                .select_related("play", "theatre_hall")
+                .annotate(ticket_available=F("theatre_hall__rows") * F("theatre_hall__seats_in_row")- Count("tickets"))
+            )
+        elif self.action in "retrieve":
+            queryset = queryset.select_related("play", "theatre_hall")
+        return queryset.order_by("id")
 
 
 class ReservationViewSet(viewsets.ModelViewSet):
