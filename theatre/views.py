@@ -1,5 +1,6 @@
 from django.db.models import Count, F
 from rest_framework import mixins, viewsets
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.viewsets import GenericViewSet
 from theatre.models import (
     Genre, Actor, Play,
@@ -90,8 +91,14 @@ class PlayViewSet(
         return queryset.distinct()
 
 
+class PerformanceSetPagination(PageNumberPagination):
+    page_size = 3
+    page_size_query_param = "page_size"
+    max_page_size = 20
+
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.select_related("play", "theatre_hall")
+    pagination_class = PerformanceSetPagination
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -103,11 +110,14 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = self.queryset
         if self.action in "list":
-            queryset = queryset.select_related("play", "theatre_hall").annotate(
+            queryset = (queryset.select_related(
+                "play", "theatre_hall"
+            )
+            .annotate(
                 ticket_available=F("theatre_hall__rows")
                 * F("theatre_hall__seats_in_row")
                 - Count("tickets")
-            )
+            ))
         elif self.action in "retrieve":
             queryset = queryset.select_related("play", "theatre_hall")
         return queryset.order_by("id")
@@ -123,7 +133,9 @@ class ReservationViewSet(
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
         if self.action in "list":
-            queryset = queryset.prefetch_related("tickets__performance__theatre_hall")
+            queryset = queryset.prefetch_related(
+                "tickets__performance__theatre_hall"
+            )
         return queryset
 
     def perform_create(self, serializer):
