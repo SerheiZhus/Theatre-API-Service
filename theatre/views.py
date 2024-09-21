@@ -1,11 +1,13 @@
 from django.db.models import Count, F
 from rest_framework import mixins, viewsets
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 from theatre.models import (
     Genre, Actor, Play,
     TheatreHall, Performance, Reservation
 )
+from theatre.permissions import IsAdminOrIfAuthenticatedReadOnly
 from theatre.serializers import (
     ActorSerializer,
     GenreSerializer,
@@ -28,6 +30,7 @@ class GenreViewSet(
 ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class ActorViewSet(
@@ -37,7 +40,7 @@ class ActorViewSet(
 ):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
-
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 class TheatreHallViewSet(
     mixins.CreateModelMixin,
@@ -46,6 +49,7 @@ class TheatreHallViewSet(
 ):
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
 
 class PlayViewSet(
@@ -55,6 +59,7 @@ class PlayViewSet(
     GenericViewSet,
 ):
     queryset = Play.objects.prefetch_related("actors", "genres")
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     @staticmethod
     def _params_to_ints(qs):
@@ -99,6 +104,7 @@ class PerformanceSetPagination(PageNumberPagination):
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.select_related("play", "theatre_hall")
     pagination_class = PerformanceSetPagination
+    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
         if self.action == "list":
@@ -129,7 +135,7 @@ class ReservationViewSet(
     GenericViewSet
 ):
     queryset = Reservation.objects.all()
-
+    permission_classes = (IsAuthenticated,)
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
         if self.action in "list":
