@@ -21,7 +21,8 @@ from theatre.serializers import (
     PerformanceListSerializer,
     PerformanceRetrieveSerializer,
     ReservationSerializer,
-    ReservationListSerializer, PlayImageSerializer,
+    ReservationListSerializer,
+    PlayImageSerializer,
 )
 
 
@@ -32,7 +33,7 @@ class GenreViewSet(
 ):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
 
 class ActorViewSet(
@@ -42,7 +43,7 @@ class ActorViewSet(
 ):
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
 
 class TheatreHallViewSet(
@@ -52,7 +53,7 @@ class TheatreHallViewSet(
 ):
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
 
 class PlayViewSet(
@@ -62,7 +63,7 @@ class PlayViewSet(
     GenericViewSet,
 ):
     queryset = Play.objects.prefetch_related("actors", "genres")
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
     @staticmethod
     def _params_to_ints(qs):
@@ -124,7 +125,7 @@ class PerformanceSetPagination(PageNumberPagination):
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.select_related("play", "theatre_hall")
-    permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
     def get_serializer_class(self):
         if self.action == "list":
