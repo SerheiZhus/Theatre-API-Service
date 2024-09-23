@@ -1,7 +1,9 @@
 from django.db.models import Count, F
-from rest_framework import mixins, viewsets
+from rest_framework import mixins, viewsets, status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 from theatre.models import (
     Genre, Actor, Play,
@@ -19,7 +21,7 @@ from theatre.serializers import (
     PerformanceListSerializer,
     PerformanceRetrieveSerializer,
     ReservationSerializer,
-    ReservationListSerializer,
+    ReservationListSerializer, PlayImageSerializer,
 )
 
 
@@ -41,6 +43,7 @@ class ActorViewSet(
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+
 
 class TheatreHallViewSet(
     mixins.CreateModelMixin,
@@ -71,6 +74,8 @@ class PlayViewSet(
             return PlayListSerializer
         elif self.action == "retrieve":
             return PlayRetrieveSerializer
+        elif self.action == "upload_image":
+            return PlayImageSerializer
         return PlaySerializer
 
     def get_queryset(self):
@@ -95,6 +100,22 @@ class PlayViewSet(
 
         return queryset.distinct()
 
+    @action(
+        detail=True,
+        methods=["POST"],
+        url_path="upload-image",
+        permission_classes=(IsAdminUser,)
+    )
+    def upload_image(self, request, pk=None):
+        play = self.get_object()
+        serializer = self.get_serializer(
+            play, data=request.data,
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 class PerformanceSetPagination(PageNumberPagination):
     page_size = 3
@@ -103,7 +124,6 @@ class PerformanceSetPagination(PageNumberPagination):
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = Performance.objects.select_related("play", "theatre_hall")
-    pagination_class = PerformanceSetPagination
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
 
     def get_serializer_class(self):
@@ -136,6 +156,7 @@ class ReservationViewSet(
 ):
     queryset = Reservation.objects.all()
     permission_classes = (IsAuthenticated,)
+
     def get_queryset(self):
         queryset = self.queryset.filter(user=self.request.user)
         if self.action in "list":
