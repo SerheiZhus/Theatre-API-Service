@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
+
 from datetime import timedelta
 from pathlib import Path
 
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "theatre",
     "user",
+    "drf_spectacular",
 ]
 
 MIDDLEWARE = [
@@ -136,8 +138,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.LimitOffsetPagination",
     "PAGE_SIZE": 4,
-
-    "DEFAULT_AUTHENTICATION_CLASSES":(
+    "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES": [
@@ -148,10 +149,26 @@ REST_FRAMEWORK = {
         "rest_framework.throttling.UserRateThrottle",
     ],
     "DEFAULT_THROTTLE_RATES": {"anon": "10/day", "user": "30/day"},
-
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
 }
+
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Theatre service API",
+    "DESCRIPTION": "Allow visitors of the theatre to make reservations "
+    "online and choose needed seats, without going "
+    "physically to the theatre",
+    "VERSION": "1.0.0",
+    "SERVE_INCLUDE_SCHEMA": False,
+    "SWAGGER_UI_SETTINGS": {
+        "deepLinking": True,
+        "defaultModelRendering": "model",
+        "defaultModelsExpandDepth": 2,
+        "defaultModelExpandDepth": 2,
+    },
 }
