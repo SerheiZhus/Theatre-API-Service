@@ -1,5 +1,4 @@
 import os
-import pathlib
 import uuid
 
 from django.conf import settings
@@ -26,12 +25,12 @@ class Genre(models.Model):
     def __str__(self) -> str:
         return self.name
 
+
 def play_image_path(instance: "Play", filename: str) -> str:
     _, extension = os.path.splitext(filename)
     filename = f"{slugify(instance.title)}-{uuid.uuid4()}{extension}"
 
     return os.path.join("upload/play/", filename)
-
 
 
 class Play(models.Model):
@@ -113,7 +112,7 @@ class Ticket(models.Model):
                     {
                         ticket_attr_name: f"{ticket_attr_name}"
                         f" number must be in available range:"
-                                          f"(1, {count_attrs})"
+                        f"(1, {count_attrs})"
                     }
                 )
 

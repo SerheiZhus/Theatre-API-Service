@@ -7,7 +7,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from theatre.models import Genre, Actor, Play, TheatreHall, Performance, Reservation
+from theatre.models import (
+    Genre, Actor, Play,
+    TheatreHall, Performance, Reservation
+)
 from theatre.serializers import (
     ActorSerializer,
     GenreSerializer,
@@ -156,10 +159,12 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         return PerformanceSerializer
 
     def get_queryset(self):
-        """Returns a set of queries filtered and annotated according to the action"""
+        """Returns a set of queries filtered
+        and annotated according to the action"""
         queryset = self.queryset
         if self.action in "list":
-            queryset = queryset.select_related("play", "theatre_hall").annotate(
+            queryset = queryset.select_related(
+                "play", "theatre_hall").annotate(
                 ticket_available=F("theatre_hall__rows")
                 * F("theatre_hall__seats_in_row")
                 - Count("tickets")
@@ -180,7 +185,9 @@ class ReservationViewSet(
         loading associated objects through the`prefetch_related."""
         queryset = self.queryset.filter(user=self.request.user)
         if self.action in "list":
-            queryset = queryset.prefetch_related("tickets__performance__theatre_hall")
+            queryset = queryset.prefetch_related(
+                "tickets__performance__theatre_hall"
+            )
         return queryset
 
     def perform_create(self, serializer):

@@ -31,7 +31,9 @@ def sample_play(**params):
 
 
 def sample_play_session(**params):
-    theatre_hall = TheatreHall.objects.create(name="Blue", rows=20, seats_in_row=20)
+    theatre_hall = TheatreHall.objects.create(
+        name="Blue", rows=20, seats_in_row=20
+    )
 
     defaults = {
         "show_time": "2022-06-02 14:00:00",
@@ -77,7 +79,9 @@ class AuthenticatedTheatreApiTests(TestCase):
         """Tests that the API correctly returns the list of  plays"""
         sample_play()
         play_actor_genre = sample_play()
-        actors = Actor.objects.create(first_name="first_test", last_name="last_test")
+        actors = Actor.objects.create(
+            first_name="first_test", last_name="last_test"
+        )
 
         genres = Genre.objects.create(name="test")
         play_actor_genre.actors.add(actors)
@@ -99,8 +103,12 @@ class AuthenticatedTheatreApiTests(TestCase):
 
         genre1 = Genre.objects.create(name="Genre 1")
         genre2 = Genre.objects.create(name="Genre 2")
-        actor1 = Actor.objects.create(first_name="Actor 1", last_name="Actor 1")
-        actor2 = Actor.objects.create(first_name="Actor 2", last_name="Actor 2")
+        actor1 = Actor.objects.create(
+            first_name="Actor 1", last_name="Actor 1"
+        )
+        actor2 = Actor.objects.create(
+            first_name="Actor 2", last_name="Actor 2"
+        )
         play1.actors.add(actor1)
         play2.actors.add(actor2)
         play1.genres.add(genre1)
@@ -109,7 +117,9 @@ class AuthenticatedTheatreApiTests(TestCase):
         res_genres = self.client.get(
             THEATRE_URL, {"genres": f"{genre1.id},{genre2.id}"}
         )
-        res_actor = self.client.get(THEATRE_URL, {"actors": f"{actor1.id},{actor2.id}"})
+        res_actor = self.client.get(
+            THEATRE_URL, {"actors": f"{actor1.id},{actor2.id}"}
+        )
         res_title = self.client.get(THEATRE_URL, {"title": "Play 1"})
         serializer1 = PlayListSerializer(play1)
         serializer2 = PlayListSerializer(play2)
@@ -135,7 +145,9 @@ class AuthenticatedTheatreApiTests(TestCase):
         """Tests retrieving a play's details"""
         play = sample_play()
         play.genres.add(Genre.objects.create(name="Genre"))
-        play.actors.add(Actor.objects.create(first_name="Actor", last_name="Last"))
+        play.actors.add(Actor.objects.create(
+            first_name="Actor", last_name="Last")
+        )
 
         url = detail_url(play.id)
         res = self.client.get(url)
@@ -145,7 +157,8 @@ class AuthenticatedTheatreApiTests(TestCase):
         self.assertEqual(res.data, serializer.data)
 
     def test_create_play_forbidden(self):
-        """Tests that the creation of a play is prohibited for unauthenticated users"""
+        """Tests that the creation of a play
+        is prohibited for unauthenticated users"""
 
         payload = {
             "title": "Play",
@@ -158,7 +171,8 @@ class AuthenticatedTheatreApiTests(TestCase):
 
 class AdminPlayApiTests(TestCase):
     def setUp(self):
-        """Configures the environment for tests with an authenticated admin user"""
+        """Configures the environment for tests
+        with an authenticated admin user"""
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
             "admin@admin.com", "testpass", is_staff=True
@@ -234,7 +248,8 @@ class PlayImageUploadTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_post_image_to_play_list_should_not_work(self):
-        """Test that posting an image to the play list endpoint does not work"""
+        """Test that posting an image to the
+        play list endpoint does not work"""
         url = THEATRE_URL
         with tempfile.NamedTemporaryFile(suffix=".jpg") as ntf:
             img = Image.new("RGB", (10, 10))
