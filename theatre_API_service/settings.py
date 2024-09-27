@@ -85,7 +85,7 @@ WSGI_APPLICATION = "theatre_API_service.wsgi.application"
 
 DATABASES = {
 
-"default": {
+    "default": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": os.environ.get("POSTGRES_DB"),
         "USER": os.environ.get("POSTGRES_USER"),
@@ -132,7 +132,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATIC_ROOT = "/files/static/"
-MEDIA_ROOT =  "files/media"
+MEDIA_ROOT = "files/media/"
 MEDIA_URL = "/media/"
 
 # Default primary key field type
