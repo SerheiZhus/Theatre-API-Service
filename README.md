@@ -20,11 +20,14 @@ API service for theatre management written on Django Rest Framework
 * pip install -r requirements.txt
 
 
-## .env Create a .env file in the root of the project and add the following variables:
+## Create a .env file in the root of the project using the example from .env-example. 
+Fill in the values in the .env file with your own data:
 - DB_HOST=<your db hostname>
 - DB_NAME=<your db name>
 - DB_USER=<your db username>
 - DB_PASSWORD=<your db password>
+- DB_PORT=<your db port>
+- PGDATA=<your db data path>
 - SECRET_KEY=<your secret key>
 
 * python manage.py migrate, python manage.py runserver
